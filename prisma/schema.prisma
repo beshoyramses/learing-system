@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Course {
+  courseId     String   @id @default(uuid())
+  teacherId    String
+  teacherName  String
+  title        String
+  description  String
+  category     String
+  image        String
+  price        Float
+  level        String
+  status       String
+  sections     Section[]
+  enrollments  Json
+  analytics    Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Section {
+  sectionId          String   @id @default(uuid())
+  sectionTitle       String
+  sectionDescription String
+  courseId           String
+  course             Course   @relation(fields: [courseId], references: [courseId])
+  chapters           Chapter[]
+}
+
+model Chapter {
+  chapterId    String   @id @default(uuid())
+  type         String
+  title        String
+  content      String
+  videoLength  Float
+  videoId      String
+  videoUrl     String
+  videoType    String
+  sectionId    String
+  section      Section  @relation(fields: [sectionId], references: [sectionId])
+  comments     Comment[]
+}
+
+model Comment {
+  commentId  String   @id @default(uuid())
+  userId     String
+  chapterId  String
+  text       String
+  timestamp  DateTime @default(now())
+  chapter    Chapter  @relation(fields: [chapterId], references: [chapterId])
+}
+
+model Transaction {
+  transactionId  String   @id @default(uuid())
+  userId         String
+  courseId       String
+  dateTime       String
+  paymentProvider String
+  amount         Float
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model UserCourseProgress {
+  userId                String
+  courseId              String
+  enrollmentDate        String
+  overallProgress       Float
+  sections              Json
+  lastAccessedTimestamp String
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+  @@id([userId, courseId])
+}
+
+model UserCourseSectionProgress {
+  userId     String
+  sectionId  String
+  chapters   Json
+  @@id([userId, sectionId])
+}
+
+model UserCourseChapterProgress {
+  userId      String
+  chapterId   String
+  completed   Boolean
+  lastPosition Float
+  @@id([userId, chapterId])
+}
+
+model ClerkUser {
+  id              String   @id @default(uuid())
+  clerkId         String   @unique
+  email           String   @unique
+  firstName       String?
+  lastName        String?
+  profileImageUrl String?
+  settings        Json?
+  userType        String?
+  publicMetadata  Json?
+  privateMetadata Json?
+  unsafeMetadata  Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
